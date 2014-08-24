@@ -1,0 +1,64 @@
+---
+title: "Exponential Distribution"
+author: "Robert Stober"
+date: "Saturday, August 23, 2014"
+output: html_document
+        
+---
+##Synopsis
+The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also also 1/lambda. Set lambda = 0.2 for all of the simulations. In this simulation, you will investigate the distribution of averages of 40 exponential(0.2)s. Note that you will need to do a thousand or so simulated averages of 40 exponentials.
+
+## Data Processing
+
+```{r echo = FALSE}
+## set initial values
+lambda<-.02
+theoreticalMean<-theoreticalPopSD<-1/lambda
+n<-40
+reps<-1000
+theoreticalSD<-round(theoreticalPopSD/sqrt(n),2)
+```
+
+```{r}
+## run rexp to get n values when rate is = lambda AND take the mean. Do that rep=1000 times and store the results in the vector means. reps = 1000, n = 40, lambda = .2
+set.seed(4321)
+means<-replicate(n=reps,mean(rexp(n=n, rate=lambda)))
+```
+## Results
+### Show where the distribution is centered at and compare it to the theoretical center of the distribution.
+```{r Q1, echo=FALSE}
+## Get the mean of means
+simulatedMean<-round(mean(means),2)
+paste("The theoretical mean is", theoreticalMean, "while the simulated mean is", simulatedMean, "This is a difference of", round(100*(theoreticalMean-simulatedMean)/theoreticalMean,2), "percent", sep = " ")
+```
+
+### Show how variable it is and compare it to the theoretical variance of the distribution.
+
+```{r Q2, echo=FALSE}
+## Get the standard deviation of means
+simulatedSD<-round(sd(means),2)
+paste("The theoretical standard deviation is", theoreticalSD, "while the simulated standard deviation is", simulatedSD, "This is a difference of", round(100*(theoreticalSD-simulatedSD)/theoreticalSD,2), "percent", sep = " ")
+```
+
+### Show that the distribution is approximately normal.
+
+A visual examination of the histogram shows the distribution to be approximately normal. It is unimodal and centered around the mean. The qqplot renforces that the distribution is approximately normal, while showing it is not exactly normal. A better plot would be had by increasing sample size.
+
+```{r Q3, echo=TRUE}
+## Get the standard deviation of means
+par(mfrow=c(1,2))
+hist(means, main ="Frequency of Simulated Means")
+qqplot(means, rnorm(n=n,mean=theoreticalMean, sd=theoreticalSD), main=" Quantile Plot of Simulated Means", ylab="Theoretical", xlab = "Simulated")
+```
+
+### Evaluate the coverage of the confidence interval for 1/lambda: X¯±1.96Sn√.
+
+```{r Q4, echo=TRUE}
+
+## get the theoretical range of the 95% confidence interval
+theoreticalRange<-theoreticalMean +c(-1,1)*1.96*theoreticalSD
+##subset to get those in range and calculate percentage
+CImeans<-subset(means, means[]>=theoreticalRange[1] & means[]<=theoreticalRange[2])
+pctCI<-round(length(CImeans)/length(means),2)
+paste("The simulated coverage was", pctCI, "percent", sep = " ")
+```

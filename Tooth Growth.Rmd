@@ -1,0 +1,100 @@
+---
+title: "Tooth Growth"
+author: "Robert Stober"
+date: "Saturday, August 23, 2014"
+output: html_document
+---
+##Synopsis
+Below is an analysis of the dataset Toothgrowth: The Effect of Vitamin C on Tooth Growth in Guinea Pigs, as per the course project for Satistical Inference. 
+Details of the data can be found here: http://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html
+
+## Data Processing
+In order to maintain the 2 page maximum requirement for this assignment, underlying code has been surpressed in the output. The complete code can be found at gitHub.
+https://github.com/rlstober/StatisticalInferenceCP
+
+### Load the ToothGrowth data and perform some basic exploratory data analyses
+The dataset consists of 60 observations of three variables; len, supp and dose. Len or length is the response variable, while supp or supplement and dose are explanatory factors.
+
+```{r echo = FALSE}
+## load data and print structure
+data(ToothGrowth)
+tg<-ToothGrowth
+tg$dose<-as.factor(tg$dose)
+str(tg)
+```
+
+### Provide a basic summary of the data.
+
+
+```{r echo = FALSE}
+## print summary
+summary(tg)
+```
+
+### Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose.
+
+Below is a table of the mean, standard deviation, and the low and high confidence intervals for each combination of supplement and dosage.
+
+```{r echo = FALSE}
+## get means
+tgMean<-aggregate(tg["len"], by=list(supp=tg$supp,dose=tg$dose), FUN=mean)
+cn<-colnames(tgMean)
+cn[3]<-"mean"
+colnames(tgMean)<-cn
+
+## get standard deviations
+tgSd<-aggregate(tg["len"], by=list(supp=tg$supp,dose=tg$dose), FUN=sd)
+cn<-colnames(tgSd)
+cn[3]<-"stdDev"
+colnames(tgSd)<-cn
+tgSd$stdDev<-round(tgSd$stdDev,2)
+
+##merge the two datasets
+tgSummary<-merge(tgMean,tgSd, by = c("supp","dose"))
+
+##calclulate confidence intervals
+tgSummaryCI<-tgSummary
+tgSummaryCI$lowCI<-round((tgSummary$mean-1.96*tgSummary$stdDev),2)
+tgSummaryCI$highCI<-round((tgSummary$mean+1.96*tgSummary$stdDev),2)
+tgSummaryCI
+
+```
+
+Below is one of the 9 t-tests performed. (Only one t-test output was displayed to save space.)
+
+```{r echo=FALSE}
+## Do some t-test
+## Compare supp at at all doseage levels
+with(tg, t.test(len[supp=="OJ"& dose==0.5], len[supp=="VC"& dose==0.5]))
+##with(tg, t.test(len[supp=="OJ"& dose==1.0], len[supp=="VC"& dose==1.0]))
+##with(tg, t.test(len[supp=="OJ"& dose==2.0], len[supp=="VC"& dose==2.0]))
+
+## Compare dosage levels for fixed supp = OJ
+##with(tg, t.test(len[supp=="OJ"& dose==0.5], len[supp=="OJ"& dose==1.0]))
+##with(tg, t.test(len[supp=="OJ"& dose==0.5], len[supp=="OJ"& dose==2.0]))
+##with(tg, t.test(len[supp=="OJ"& dose==1.0], len[supp=="OJ"& dose==2.0]))
+
+## Compare dosage levels for fixed supp = VC
+##with(tg, t.test(len[supp=="VC"& dose==0.5], len[supp=="VC"& dose==1.0]))
+## with(tg, t.test(len[supp=="VC"& dose==0.5], len[supp=="VC"& dose==2.0]))
+##  with(tg, t.test(len[supp=="VC"& dose==1.0], len[supp=="VC"& dose==2.0]))
+
+```
+## Results
+### State your conclusions and the assumptions needed for your conclusions. 
+
+Results indicate that at tooth growth is higher at low dosages of Vitamin C when it is delivered with Orange juice versus delivery with ascorbic acid. At high dosages of Vitamin C, this effect appears to diminish. 
+
+This is seen in the t-test, where the null hypothesis is that there is no difference n tooth growth length between orange juice and ascorbic acid. The alternative hypthesis is hat ther eis a difference.  The low pvalues for OJ at 0.5 and 1.0 mgs of Vitamin C compared to ascorbic acid (.006 and .001) are beyond the 95% confidence interfal, so we reject the null hypothesis for those conditions. At a dosage of 2.0 mgs the p-value was .96 indicating no difference in the populations. In that case we fail to reject the null hypothesis. 
+
+We can also compare dosage levels for fixed supplement. (output not shown to save space). The null hypothesis is that for delivery with either orange juice or ascorbic acid, tooth growth is the same with different dosages of vitamin C. Under all conditions we see very low p-values, causing us to reject the null hypothesis. 
+
+Conclusions are based on the assumptions of normality of the underlying data and that randomization removed any confounding factors.
+
+
+
+```{r echo = FALSE}
+##interaction.plot(ToothGrowth$dose, ToothGrowth$supp, ToothGrowth$len)
+```
+
+
